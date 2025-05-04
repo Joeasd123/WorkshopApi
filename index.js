@@ -14,15 +14,12 @@ app.use(cors())
 app.use('/api/uploads', express.static('uploads'));
 app.use("/api", uploadRouter);
 
-const PORT = 5002;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+
 
 readdirSync('./routes')
 .map((item)=> app.use('/api',require('./routes/'+item)))
 
-
+module.exports = app;
 
 
 // app.use('/api',authRouter)
