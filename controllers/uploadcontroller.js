@@ -7,6 +7,9 @@ const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         const uploadDir = 'uploads/';
         const fs = require('fs');
+         limits: {
+    fileSize: 10 * 1024 * 1024 // ขนาดไฟล์สูงสุด 10MB
+  }
         if (!fs.existsSync(uploadDir)) {
             fs.mkdirSync(uploadDir);
         }
@@ -18,7 +21,10 @@ const storage = multer.diskStorage({
     }
 });
 
-const upload = multer({ storage });
+const upload = multer({ storage , 
+    limits: {
+    fileSize: 10 * 1024 * 1024 
+  }});
 
 exports.uploadFile = (req, res) => {
     upload.single('file')(req, res, async (err) => {
