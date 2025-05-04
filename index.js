@@ -4,6 +4,7 @@ const morgan = require('morgan')
 const {readdirSync} = require('fs')
 const cors = require('cors')
 const uploadRouter = require("./routes/upload");
+const serverless = require('serverless-http');
 
 
 // const authRouter = require('./routes/auth')
@@ -19,7 +20,7 @@ app.use("/api", uploadRouter);
 readdirSync('./routes')
 .map((item)=> app.use('/api',require('./routes/'+item)))
 
-module.exports = app;
+module.exports = serverless(app);
 
 
 // app.use('/api',authRouter)
