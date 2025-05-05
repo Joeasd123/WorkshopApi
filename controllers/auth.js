@@ -58,9 +58,7 @@ const user =await prisma.user.findFirst({
 
     }
 })
-if(!user || !user.enabled){
-    return res.status(400).json({message: 'User Not found'})
-}
+
 
 
 //step 2 password
