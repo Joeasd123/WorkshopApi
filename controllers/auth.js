@@ -70,6 +70,7 @@ if(!isMatch){
 }
 
 //step 3 Payload
+console.log('JWT_SECRET:', process.env.SECRET)
 const payload ={
     id: user.id,
     email: user.email,
@@ -81,7 +82,8 @@ jwt.sign(payload,process.env.SECRET,{
 },(err,token)=>{
     if(err){
         return res.status(500).json({
-            message:'Server '
+            message: 'Token signing error',
+            error: err.message
         })
     }
     res.json({payload,token})
