@@ -17,6 +17,10 @@ readdirSync('./routes').map((item) =>
   app.use('/api', require('./routes/' + item))
 );
 
+app.get('/', (req, res) => {
+    res.send('API is working');
+  });
+
 // ✅ ใช้แบบ Express ปกติ
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
