@@ -70,25 +70,25 @@ if(!isMatch){
 }
 
 //step 3 Payload
-
+console.log('JWT_SECRET:', process.env.SECRET)
 const payload ={
     id: user.id,
     email: user.email,
     role: user.role
 }
 //step 4 checkToken
-jwt.sign(payload,process.env.SECRET,{
-    expiresIn:'1d'
-},(err,token)=>{
-    if(err){
-        return res.status(500).json({
-            message: 'Token signing error',
-            error: err.message
-        })
-    }
-    res.json({payload,token})
-})
-
+// jwt.sign(payload,process.env.SECRET,{
+//     expiresIn:'1d'
+// },(err,token)=>{
+//     if(err){
+//         return res.status(500).json({
+//             message: 'Token signing error',
+//             error: err.message
+//         })
+//     }
+//     res.json({payload,token})
+// })
+res.json({payload})
 
 } catch (error) {
     console.log(error)
