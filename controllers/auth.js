@@ -49,7 +49,7 @@ exports.login =async (req,res)=>{
 
 try {
 const {email,password} =req.body
-
+console.log('📥 Body:', email, password);
 
 //step 1 checkemail
 const user =await prisma.user.findFirst({
