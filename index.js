@@ -1,32 +1,24 @@
 const express = require('express');
-const app= express()
-const morgan = require('morgan')
-const {readdirSync} = require('fs')
-const cors = require('cors')
-const uploadRouter = require("./routes/upload");
-const serverless = require('serverless-http');
+const app = express();
+const morgan = require('morgan');
+const { readdirSync } = require('fs');
+const cors = require('cors');
+const uploadRouter = require('./routes/upload');
 
-
-// const authRouter = require('./routes/auth')
-// const categoryRouter = require('./routes/category')
-app.use(morgan('dev'))
-app.use(express.json())
-app.use(cors())
+// Middleware
+app.use(morgan('dev'));
+app.use(express.json());
+app.use(cors());
 app.use('/api/uploads', express.static('uploads'));
-app.use("/api", uploadRouter);
+app.use('/api', uploadRouter);
 
+// Auto-import routes
+readdirSync('./routes').map((item) =>
+  app.use('/api', require('./routes/' + item))
+);
 
-
-readdirSync('./routes')
-.map((item)=> app.use('/api',require('./routes/'+item)))
-
-module.exports = serverless(app);
-
-
-// app.use('/api',authRouter)
-// app.use('/api',categoryRouter)
-
-
-
-
-
+// ✅ ใช้แบบ Express ปกติ
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`✅ Server is running on port ${PORT}`);
+});
