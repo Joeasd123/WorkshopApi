@@ -81,7 +81,7 @@ jwt.sign(payload,process.env.SECRET,{
 },(err,token)=>{
     if(err){
         return res.status(500).json({
-            message:'Server Error'
+            message:'Server '
         })
     }
     res.json({payload,token})
