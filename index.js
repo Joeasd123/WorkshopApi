@@ -1,4 +1,4 @@
-require('dotenv').config();
+
 const express = require('express');
 const app = express();
 const morgan = require('morgan');
@@ -17,6 +17,7 @@ app.use('/api', uploadRouter);
 readdirSync('./routes').map((item) =>
   app.use('/api', require('./routes/' + item))
 );
+console.log('SECRET is:', process.env.SECRET);
 
 app.get('/', (req, res) => {
     res.send('API is working');

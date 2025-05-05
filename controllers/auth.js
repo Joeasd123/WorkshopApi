@@ -70,7 +70,7 @@ if(!isMatch){
 }
 
 //step 3 Payload
-console.log('JWT_SECRET:', process.env.SECRET)
+
 const payload ={
     id: user.id,
     email: user.email,
