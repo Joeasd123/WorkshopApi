@@ -3,12 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-  "start": "node index.js",
-  "dev": "nodemon index.js",
-  "vercel-build": "prisma generate",
-  "test": "echo \"Error: no test specified\" && exit 1"
-}
-,
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "vercel-build": "prisma generate",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -24,7 +23,7 @@
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.2",
     "nodemon": "^3.1.9",
-    "prisma": "^6.4.0",
+    "prisma": "^6.7.0",
     "serverless-http": "^3.2.0"
   },
   "devDependencies": {
