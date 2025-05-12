@@ -51,23 +51,21 @@ exports.uploadFile = (req, res) => {
       }
 
       // รับ URL สาธารณะ (public URL) ของไฟล์ที่อัปโหลด
-      const { data: publicUrlData, error: urlError } = await supabase
-        .storage
-        .from('uploads')  // ชื่อ bucket ที่ต้องการ
-        .getPublicUrl(filePath);
-
-      if (urlError) {
-        throw urlError;
+      const { data: { publicUrl }, error: urlError } = await supabase
+      .storage
+      .from('uploads')
+      .getPublicUrl(filePath);
+    
+    if (urlError || !publicUrl) {
+      throw urlError || new Error("No public URL returned");
+    }
+    
+    // บันทึกลงฐานข้อมูล
+    const uploadData = await prisma.upload.create({
+      data: {
+        url: publicUrl
       }
-
-      const publicUrl = publicUrlData.publicUrl;
-
-      // บันทึก URL ลงในฐานข้อมูล
-      const uploadData = await prisma.upload.create({
-        data: {
-          url: publicUrl,  // URL ของไฟล์ที่อัปโหลด
-        }
-      });
+    });
 
       res.json({
         code: "200",
