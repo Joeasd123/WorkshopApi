@@ -13,6 +13,9 @@ app.use(express.json());
 app.use(cors());
 app.use('/api/uploads', express.static('uploads'));
 app.use('/api', uploadRouter);
+const DATABASE_URL = process.env.DATABASE_URL;
+const SECRET = process.env.SECRET;
+const PORT = process.env.PORT || 3000;
 console.log('✅ Loaded SECRET:', process.env.SECRET);
 // Auto-import routes
 readdirSync('./routes').map((item) =>
@@ -25,7 +28,8 @@ app.get('/', (req, res) => {
   });
 
 // ✅ ใช้แบบ Express ปกติ
-const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
   console.log(`✅ Server is running on port ${PORT}`);
 });
+
