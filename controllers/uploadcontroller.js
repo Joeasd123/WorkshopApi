@@ -3,6 +3,10 @@ const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
 const prisma = require('../config/prisma');
 
+// โหลด environment variables
+require('dotenv').config();
+
+// ตั้งค่า Supabase
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY; // หรือใช้ anon ถ้าต้องการ
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -12,7 +16,7 @@ const storage = multer.memoryStorage();
 const upload = multer({
   storage,
   limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB
+    fileSize: 10 * 1024 * 1024 // ขนาดไฟล์สูงสุด 10MB
   }
 });
 
@@ -28,34 +32,40 @@ exports.uploadFile = (req, res) => {
     }
 
     try {
+      // ตั้งชื่อไฟล์ที่อัปโหลด
       const fileExt = path.extname(req.file.originalname);
       const fileName = `${Date.now()}${fileExt}`;
       const filePath = `uploads/${fileName}`;
 
-      // อัปโหลดไฟล์ไป Supabase
+      // อัปโหลดไฟล์ไปยัง Supabase
       const { error: uploadError } = await supabase
         .storage
-        .from('uploads') 
+        .from('uploads')  // ชื่อ bucket ที่ต้องการ
         .upload(filePath, req.file.buffer, {
-          contentType: req.file.mimetype
+          contentType: req.file.mimetype,  // กำหนดชนิดของไฟล์
+          upsert: true  // ใช้เพื่อไม่ให้เกิดการเขียนทับไฟล์เดิม (ถ้าต้องการ)
         });
 
       if (uploadError) {
         throw uploadError;
       }
 
-      // เอา public URL มาใช้
-      const { data: publicUrlData } = supabase
+      // รับ URL สาธารณะ (public URL) ของไฟล์ที่อัปโหลด
+      const { data: publicUrlData, error: urlError } = await supabase
         .storage
-        .from('uploads')
+        .from('uploads')  // ชื่อ bucket ที่ต้องการ
         .getPublicUrl(filePath);
+
+      if (urlError) {
+        throw urlError;
+      }
 
       const publicUrl = publicUrlData.publicUrl;
 
-      // บันทึก URL ลง DB
+      // บันทึก URL ลงในฐานข้อมูล
       const uploadData = await prisma.upload.create({
         data: {
-          url: publicUrl,
+          url: publicUrl,  // URL ของไฟล์ที่อัปโหลด
         }
       });
 
