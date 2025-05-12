@@ -50,48 +50,43 @@ const usersuccess = await prisma.user.create({
     
 }
 
-exports.login =async (req,res)=>{
-
-try {
-const {email,password} =req.body
-console.log('📥 Body:', email, password);
-
-//step 1 checkemail
-const user =await prisma.user.findFirst({
-    where:{ 
-        email:email
-
+exports.login = async (req, res) => {
+    try {
+      const { email, password } = req.body;
+  
+      const user = await prisma.user.findFirst({ where: { email } });
+  
+      if (!user) {
+        return res.status(400).json({ message: 'Email not found' });
+      }
+  
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ message: 'Password Invalid' });
+      }
+  
+      const payload = {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        name: user.name,
+        image: user.image
+      };
+  
+      if (!process.env.SECRET) {
+        console.log('⚠️ JWT SECRET not found');
+        return res.status(500).json({ message: 'Server config error' });
+      }
+  
+      const token = jwt.sign(payload, process.env.SECRET, { expiresIn: '7d' });
+  
+      res.json({ token, payload });
+    } catch (error) {
+      console.log('❌ Error:', error);
+      res.status(500).json({ message: 'Server Error' });
     }
-})
-
-
-
-//step 2 password
-
-const isMatch =await bcrypt.compare(password,user.password)
-
-if(!isMatch){
-    return res.status(400).json({message:'Password Invalid'})
-}
-
-//step 3 Payload
-const token = jwt.sign(payload, process.env.SECRET, { expiresIn: '7d' });
-const payload ={
-    id: user.id,
-    email: user.email,
-    role: user.role,
-    name: user.name,
-    image:user.image
-    
-}
-
-res.json({token,payload})
-
-} catch (error) {
-    console.log(error)
-    res.status(500).json({message:"Server Error"})
-}
-}   
+  };
+  
 
 exports.currentUser = async(req,res)=>{
 
