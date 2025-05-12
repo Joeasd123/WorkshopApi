@@ -16,12 +16,13 @@ app.use('/api', uploadRouter);
 const DATABASE_URL = process.env.DATABASE_URL;
 const SECRET = process.env.SECRET;
 const PORT = process.env.PORT || 3000;
-console.log('✅ Loaded SECRET:', process.env.SECRET);
+console.log('SUPABASE_URL:', process.env.SUPABASE_URL);
+console.log('SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY);
 // Auto-import routes
 readdirSync('./routes').map((item) =>
   app.use('/api', require('./routes/' + item))
 );
-console.log('SECRET is:', process.env.SECRET);
+
 
 app.get('/', (req, res) => {
     res.send('API is working');
