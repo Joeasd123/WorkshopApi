@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken')
 exports.register = async (req,res)=>{
 
 try {
-    const { email,password } = req.body;
+    const { email,password,name, } = req.body;
     if(!email){
         return res.status(400).json({message:"Email is required"})
     }
@@ -33,7 +33,9 @@ console.log(hashPassword)
 const usersuccess = await prisma.user.create({
     data:{
         email: email,
-        password:hashPassword
+        password:hashPassword,
+        name: name
+
     }
 })
 
@@ -74,20 +76,11 @@ console.log('JWT_SECRET:', process.env.SECRET)
 const payload ={
     id: user.id,
     email: user.email,
-    role: user.role
+    role: user.role,
+    name: user.name
+    
 }
-//step 4 checkToken
-// jwt.sign(payload,process.env.SECRET,{
-//     expiresIn:'1d'
-// },(err,token)=>{
-//     if(err){
-//         return res.status(500).json({
-//             message: 'Token signing error',
-//             error: err.message
-//         })
-//     }
-//     res.json({payload,token})
-// })
+
 res.json({payload})
 
 } catch (error) {

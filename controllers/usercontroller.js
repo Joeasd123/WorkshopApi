@@ -12,9 +12,9 @@ exports.create = async (req, res) => {
         const pictureList = Array.isArray(images) ? images : [images];
         const userId = Number(id);
 
-        // ใช้คำสั่ง upsert เพื่อตรวจสอบว่ามีข้อมูลในฐานข้อมูลแล้วหรือไม่
+      
         const user = await prisma.user.upsert({
-            where: { id: Number(userId) }, // ตรวจสอบว่ามี user ที่มี id นี้อยู่แล้วหรือไม่
+            where: { id: Number(userId) },
             update: {
                 name: name,
                 email: email,
