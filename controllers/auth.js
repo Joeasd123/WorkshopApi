@@ -75,16 +75,17 @@ if(!isMatch){
 }
 
 //step 3 Payload
-console.log('JWT_SECRET:', process.env.SECRET)
+const token = jwt.sign(payload, process.env.SECRET, { expiresIn: '7d' });
 const payload ={
     id: user.id,
     email: user.email,
     role: user.role,
-    name: user.name
+    name: user.name,
+    image:user.image
     
 }
 
-res.json({payload})
+res.json({token,payload})
 
 } catch (error) {
     console.log(error)
