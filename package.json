@@ -16,6 +16,7 @@
   "dependencies": {
     "@prisma/client": "^6.7.0",
     "@supabase/supabase-js": "^2.49.4",
+    "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
@@ -25,7 +26,9 @@
     "multer": "^1.4.5-lts.2",
     "nodemon": "^3.1.9",
     "prisma": "^6.7.0",
-    "serverless-http": "^3.2.0"
+    "serverless-http": "^3.2.0",
+    "socket.io": "^4.8.1",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "prima": "^0.0.1"

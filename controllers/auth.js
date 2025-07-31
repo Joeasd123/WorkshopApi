@@ -1,100 +1,118 @@
+const prisma = require("../config/prisma");
+const bcrypt = require("bcrypt");
+const { v4: uuidv4 } = require("uuid");
+const jwt = require("jsonwebtoken");
 
-const prisma =require('../config/prisma')
-const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
+// ✅ Register
+const supabase = require('../lib/supabase');
 
-exports.register = async (req,res)=>{
+exports.register = async (req, res) => {
+  try {
+    const { email, password, name, images } = req.body;
 
-try {
-    const { email,password,name,images } = req.body;
-    if(!email){
-        return res.status(400).json({message:"Email is required"})
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
     }
-    if(!password){
-        return res.status(400).json({message:"Password is required"})
+
+    // สมัครผู้ใช้ผ่าน Supabase
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    if (error) {
+      return res.status(400).json({ message: error.message });
     }
 
-    //Step2 Check Email in DB
-    const user = await prisma.user.findFirst({
-        where:{
-            email:email
-        }
-    })
-   if(user){
-    return res.status(400).json({message:"Email already exists"})
-   }
-    
-//Step3 Check Email in DB
-const hashPassword = await bcrypt.hash(password,10)
-console.log(hashPassword)
+    const supabaseUser = data.user;
 
-//Step4 Register
+    // บันทึกข้อมูลเสริมใน Prisma DB
+    const newUser = await prisma.user.create({
+      data: {
+        auth_uid: supabaseUser.id, // ใช้ UID จาก Supabase
+        email,
+        name,
+        images: images ? { create: images } : undefined,
+      },
+      include: { images: true },
+    });
 
-const usersuccess = await prisma.user.create({
-    data:{
-        email: email,
-        password:hashPassword,
-        name: name,
-        images:images
+    res.status(201).json({
+      message: "Register successful",
+      user: newUser,
+    });
 
-    }, include:{
-        images:true
-    }
-})
+  } catch (error) {
+    console.error("Register error:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
 
-    res.send(usersuccess);
-} catch (error) {
-    console.log(error)
-    res.status(500).json({message:"Server Error"})
-}
-    
-}
+
+// ✅ Login
+
 
 exports.login = async (req, res) => {
-    try {
-      const { email, password } = req.body;
-  
-      const user = await prisma.user.findFirst({ where: { email } });
-  
-      if (!user) {
-        return res.status(400).json({ message: 'Email not found' });
-      }
-  
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        return res.status(400).json({ message: 'Password Invalid' });
-      }
-  
-      const payload = {
+  try {
+    const { email, password } = req.body;
+    console.log('Login attempt:', { email, password: password ? '******' : null });
+
+    if (!email || !password) {
+      console.log('Missing email or password');
+      return res.status(400).json({ message: "Email and password are required" });
+    }
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      console.log('Login error from Supabase:', error);
+      return res.status(400).json({ message: error.message });
+    }
+
+    const { session, user } = data;
+
+    res.json({
+      token: session.access_token,
+      user: {
         id: user.id,
         email: user.email,
-        role: user.role,
-        name: user.name,
-        image: user.image
-      };
-  
-      if (!process.env.SECRET) {
-        console.log('⚠️ JWT SECRET not found');
-        return res.status(500).json({ message: 'Server config error' });
       }
-  
-      const token = jwt.sign(payload, process.env.SECRET, { expiresIn: '7d' });
-  
-      res.json({ token, payload });
-    } catch (error) {
-      console.log('❌ Error:', error);
-      res.status(500).json({ message: 'Server Error' });
+    });
+
+  } catch (error) {
+    console.error("Supabase login error:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+
+// ✅ ตรวจสอบว่า token ใช้งานได้ (ต้องใช้ middleware ดึง req.user มาก่อน)
+exports.currentUser = async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.replace('Bearer ', '');
+
+    if (!token) {
+      return res.status(401).json({ message: 'No token provided' });
     }
-  };
-  
 
-exports.currentUser = async(req,res)=>{
+    const decoded = jwt.verify(token, process.env.SECRET);
 
-    try {
-        res.send('Hello CurrentUser ')
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({message:"Server Error"})
+    const user = await prisma.user.findUnique({
+      where: { email: decoded.email },
+      include: { images: true },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
-    }   
 
+    res.json({ user });
+  } catch (error) {
+    console.error('Current user error:', error);
+    res.status(401).json({ message: 'Invalid or expired token' });
+  }
+};
