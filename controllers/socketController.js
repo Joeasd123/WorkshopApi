@@ -26,10 +26,10 @@ const setupSocketListeners = (io) => {
     // Event: SendMessage - Handle text messages
     socket.on('SendMessage', (data) => {
       // data should be an array: [senderId, senderName, receiverId, messageText]
-      if (!Array.isArray(data) || data.length < 4) {
-        console.error(`Invalid 'SendMessage' data received from ${socket.id}:`, data);
-        return;
-      }
+    //   if (!Array.isArray(data) || data.length < 4) {
+    //     console.error(`Invalid 'SendMessage' data received from ${socket.id}:`, data);
+    //     return;
+    //   }
 
       const [senderId, senderName, receiverId, messageText] = data;
       console.log(`Received text message: From ${senderId} to ${receiverId}: "${messageText}"`);
