@@ -24,32 +24,32 @@ const setupSocketListeners = (io) => {
     });
 
     // Event: SendMessage - Handle text messages
-    socket.on('SendMessage', (data) => {
-      // data should be an array: [senderId, senderName, receiverId, messageText]
-    //   if (!Array.isArray(data) || data.length < 4) {
-    //     console.error(`Invalid 'SendMessage' data received from ${socket.id}:`, data);
-    //     return;
-    //   }
+ socket.on('SendMessage', (data) => {
+  if (!data || typeof data !== 'object') {
+    console.error(`Invalid 'SendMessage' data received from ${socket.id}:`, data);
+    return;
+  }
 
-      const [senderId, senderName, receiverId, messageText] = data;
-      console.log(`Received text message: From ${senderId} to ${receiverId}: "${messageText}"`);
+  const { senderId, senderName, receiverId, messageText } = data;
+  console.log(`Received text message: From ${senderId} to ${receiverId}: "${messageText}"`);
 
-      const messagePayload = [senderId, senderName, receiverId, messageText];
+  const messagePayload = { senderId, senderName, receiverId, messageText };
 
-      // Echo message back to sender
-      socket.emit('ReceivePrivateMessage', messagePayload);
+  // Echo back to sender
+  socket.emit('ReceivePrivateMessage', messagePayload);
 
-      // Send message to the intended receiver
-      const receiverSocketId = connectedUsers[receiverId];
-      if (receiverSocketId && receiverSocketId !== socket.id) {
-          io.to(receiverSocketId).emit('ReceivePrivateMessage', messagePayload);
-          console.log(`Text message emitted to receiver ${receiverId} (Socket ID: ${receiverSocketId})`);
-      } else if (receiverSocketId === socket.id) {
-          console.log(`Message is for self, already echoed. Receiver ID: ${receiverId}`);
-      } else {
-          console.log(`Receiver ${receiverId} is offline or not registered. Message not delivered.`);
-      }
-    });
+  // Send to receiver
+  const receiverSocketId = connectedUsers[receiverId];
+  if (receiverSocketId && receiverSocketId !== socket.id) {
+    io.to(receiverSocketId).emit('ReceivePrivateMessage', messagePayload);
+    console.log(`Message sent to ${receiverId} (Socket ID: ${receiverSocketId})`);
+  } else if (receiverSocketId === socket.id) {
+    console.log(`Message is for self`);
+  } else {
+    console.log(`Receiver ${receiverId} is offline or not registered`);
+  }
+});
+
 
     // Event: SendImage - Handle image URLs
     socket.on('SendImage', (data) => {
