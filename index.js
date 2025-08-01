@@ -11,7 +11,7 @@ const path = require('path');
 const morgan = require('morgan'); 
 
 
-const { setupSocketListeners } = require('./src/socketController');
+const { setupSocketListeners } = require('./controllers/socketController');
 
 const app = express();
 const server = http.createServer(app);
